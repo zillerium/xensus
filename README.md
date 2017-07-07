@@ -1,2 +1,2 @@
 # xensus
-hackathon 
+hackathon event 
