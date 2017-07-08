@@ -33,3 +33,22 @@ axios.all([
 
 axios.get('https://api.github.com/users/codeheaven-io', config);
 axios.post('/save', { firstName: 'Marlon' }, config);
+
+//Conneting to sotori:
+// install it with node: install satori-rtm-sdk
+var RTM = require('satori-rtm-sdk');
+
+var endpoint = 'YOUR_ENDPOINT';
+var appkey = 'YOUR_APPKEY';
+
+var client = new RTM(endpoint, appkey);
+
+client.on('enter-connected', function () {
+  console.log('Connected to Satori RTM!');
+});
+
+client.on('error', function (error) {
+  console.log('Failed to connect', error);
+});
+
+client.start();
