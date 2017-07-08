@@ -1,0 +1,6 @@
+A. Getting Real Time Data for the Demo
+  I propose to use this live streaming data from public bikes sharing: 
+  https://www.satori.com/channels/US-Bike-Sharing-Channel
+  [Is managed by Satori Live Data, they have an SDK and an API]
+
+B. 
