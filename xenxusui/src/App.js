@@ -19,21 +19,30 @@ class App extends Component {
     var zIpfsAPI = IpfsAPI('127.0.0.1', '', {protocol: 'http', port: '5001', progress: 'false'})
     this.state = {val: 0, increasing: false, contractJson:[], products:[],IPFSContract:'', IPFSText: '--',
       ETHEREUM_CLIENT: 'a', UserMessage: [], contractAddress: '0x8d3e374e9dfcf7062fe8fc5bd5476b939a99b3ed',
-      zIpfsAPIParm: zIpfsAPI}
+      zIpfsAPIParm: zIpfsAPI, ZsendAddress:'0x32107dd216bd2b3a5f9e403a7f9f70a895ef749c',ZsendContract:''}
 // 0x9cceb4e507b6c498c66e812328c348e7f6a61c88 new
 // 0x8d3e374e9dfcf7062fe8fc5bd5476b939a99b3ed old
+// 0x32107dd216bd2b3a5f9e403a7f9f70a895ef749c
     this.reformatArray = this.reformatArray.bind(this)
     this.reformatArrayEnd = this.reformatArrayEnd.bind(this)
     this.addIPFSContent = this.addIPFSContent.bind(this)
     this.makeAPIData = this.makeAPIData.bind(this)
     this.callthis = this.callthis.bind(this)
-
+  this.zsendPayment = this.zsendPayment.bind(this)
   }
 
   setClient = ( ) => {
     console.log("props", this)
   //  this.setState({ ETHEREUM_CLIENT: info });
   }
+
+zsendPayment() {
+
+var from = "0x48884f1f259a4fdbb22b77b56bfd486fe7784304"
+var to = "0x5b4e07bab9b0ec67076a670681cab7c344678ff8"
+
+    this.state.ZsendContract.makepayment(from, to, 1);
+}
 
   addIPFSContentSuper(msg) {
     var s = new Buffer(msg);
@@ -107,6 +116,11 @@ this.setState({client: client, channel: channel});
 
   let IPFSContractLocal = w.eth.contract(localJsonABI).at(this.state.contractAddress)
   this.setState({IPFSContract: IPFSContractLocal})
+
+let ZsendABI= [ { "constant": true, "inputs": [], "name": "minter", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "balances", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "receiver", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "mint", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "from", "type": "address" }, { "name": "to", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "makepayment", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "receiver", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "send", "outputs": [], "payable": false, "type": "function" }, { "inputs": [], "payable": false, "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "from", "type": "address" }, { "indexed": false, "name": "to", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" } ], "name": "Sent", "type": "event" } ]
+
+  let ZsendLocal = w.eth.contract(ZsendABI).at(this.state.ZsendAddress)
+  this.setState({ZsendContract: ZsendLocal})
 
 w.eth.defaultAccount = w.eth.coinbase;
 
@@ -220,7 +234,7 @@ client.on('enter-connected', function () {
 
  setTimeout(function() {
    console.log(temp, "PRINTED HERE");
-    
+
 
  }, 1000);
 
@@ -231,7 +245,8 @@ client.on('enter-connected', function () {
 
 callthis(temp) {
   console.log(temp, "here is it" );
-this.addIPFSContentSuper(JSON.stringify(temp))
+//this.addIPFSContentSuper(JSON.stringify(temp))
+this.zsendPayment()
     //    console.log("self ", _SELF);
 }
 
