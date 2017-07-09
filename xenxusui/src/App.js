@@ -1,10 +1,10 @@
 
 import React, {Component} from 'react';
-import logo from './logo.svg';
+import Logo from './logo.png';
 import './App.css';
 import Web3 from 'web3'
 import _ from 'lodash'
-import {Navbar, Jumbotron, Button} from 'react-bootstrap';
+import {Navbar, Jumbotron, Button, Image, PageHeader, Form, FormGroup, Pager, ControlLabel} from 'react-bootstrap';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import IpfsAPI from 'ipfs-api'
 
@@ -17,9 +17,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     var zIpfsAPI = IpfsAPI('127.0.0.1', '', {protocol: 'http', port: '5001', progress: 'false'})
-    this.state = {val: 0, increasing: false, contractJson:[], products:[],IPFSContract:'', IPFSText: '--',
+    this.state = {val: 0, processingMessage:'', increasing: false, contractJson:[], products:[],IPFSContract:'', IPFSText: '--',
       ETHEREUM_CLIENT: 'a', UserMessage: [], contractAddress: '0x8d3e374e9dfcf7062fe8fc5bd5476b939a99b3ed',
-      zIpfsAPIParm: zIpfsAPI, ZsendAddress:'0x32107dd216bd2b3a5f9e403a7f9f70a895ef749c',ZsendContract:''}
+      zIpfsAPIParm: zIpfsAPI, ZsendAddress:'0xd73e172751e751d274037cb1f668eb637df55e33',ZsendContract:''}
 // 0x9cceb4e507b6c498c66e812328c348e7f6a61c88 new
 // 0x8d3e374e9dfcf7062fe8fc5bd5476b939a99b3ed old
 // 0x32107dd216bd2b3a5f9e403a7f9f70a895ef749c
@@ -41,7 +41,8 @@ zsendPayment() {
 var from = "0x48884f1f259a4fdbb22b77b56bfd486fe7784304"
 var to = "0x5b4e07bab9b0ec67076a670681cab7c344678ff8"
 
-    this.state.ZsendContract.makepayment(from, to, 1);
+    var success = this.state.ZsendContract.send(to, 1);
+    console.log("success", success);
 }
 
   addIPFSContentSuper(msg) {
@@ -117,7 +118,8 @@ this.setState({client: client, channel: channel});
   let IPFSContractLocal = w.eth.contract(localJsonABI).at(this.state.contractAddress)
   this.setState({IPFSContract: IPFSContractLocal})
 
-let ZsendABI= [ { "constant": true, "inputs": [], "name": "minter", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "balances", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "receiver", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "mint", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "from", "type": "address" }, { "name": "to", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "makepayment", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "receiver", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "send", "outputs": [], "payable": false, "type": "function" }, { "inputs": [], "payable": false, "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "from", "type": "address" }, { "indexed": false, "name": "to", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" } ], "name": "Sent", "type": "event" } ]
+let ZsendABI=   [ { "constant": true, "inputs": [], "name": "minter", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "balances", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "receiver", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "mint", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [ { "name": "from", "type": "address" }, { "name": "to", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "makepayment", "outputs": [ { "name": "success", "type": "bool" } ], "payable": false, "type": "function" }, { "constant": true, "inputs": [ { "name": "receiver", "type": "address" }, { "name": "amount", "type": "uint256" } ], "name": "send", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "type": "function" }, { "inputs": [], "payable": false, "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "from", "type": "address" }, { "indexed": false, "name": "to", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" } ], "name": "Sent", "type": "event" } ]
+
 
   let ZsendLocal = w.eth.contract(ZsendABI).at(this.state.ZsendAddress)
   this.setState({ZsendContract: ZsendLocal})
@@ -159,11 +161,13 @@ var _this = this;
                reviewArray.push(j);
                reviewAddr.push(fulladdr);
                reviewText.push(result.data);
+               var bidValue= 1;
                _this.setState({
                                products:  _this.state.products.concat({
                                'reviewIndex': j,
                                  'ipfsAddr': fulladdr,
-                              'ipfsText': result.data
+                              'ipfsText': JSON.stringify(result.data),
+                              'ipfsBid': bidValue
                             })
                         })
 
@@ -184,7 +188,7 @@ reformatArray(strVal) {
   for (var n = 0; n < hex.length; n += 2) {
       aIPDFDataRec += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
   }
-  return aIPDFDataRec;
+    return aIPDFDataRec;
 }
 
 reformatArrayEnd(strVal) {
@@ -200,7 +204,7 @@ reformatArrayEnd(strVal) {
 
 
 makeAPIData() {
-
+this.setState({processingMessage: "We are processing your request"})
 var client = this.state.client;
 var channel = this.state.channel;
 var _SELF = this;
@@ -245,8 +249,8 @@ client.on('enter-connected', function () {
 
 callthis(temp) {
   console.log(temp, "here is it" );
-//this.addIPFSContentSuper(JSON.stringify(temp))
-this.zsendPayment()
+this.addIPFSContentSuper(JSON.stringify(temp))
+//this.zsendPayment()
     //    console.log("self ", _SELF);
 }
 
@@ -288,42 +292,61 @@ render() {
   this.state.UserMessage.forEach((item, i) => {
          ShowMessage.push(<p className = "jenbil-warn">{item}</p>);
      });
+     const pageHeaderInstance = (
+  <PageHeader>XENXUS - IOT Data Marketplace</PageHeader>
+);
+     const thumbnailInstance = (
 
+
+         <Image href="#" width="150" height="150" alt="171x180" src="https://s12.postimg.org/mhx4rq98t/logo.png" responsive/>
+
+
+     );
+
+     const formInstance = (
+  <Form inline>
+    <FormGroup controlId="formInlineName">
+      <ControlLabel>{thumbnailInstance}</ControlLabel>
+
+    </FormGroup>
+
+    <FormGroup controlId="formInlineEmail">
+      <ControlLabel  >
+      <Pager>
+    <Pager.Item >{pageHeaderInstance}</Pager.Item>
+
+  </Pager>
+
+      </ControlLabel>
+
+    </FormGroup>
+
+  </Form>
+);
     return (
         <div>
-            <p className="App-intro">
-                Demo - read the blockchain and display text contents from IPFS
-            </p>
-            <input
-                 type="text"
-                 id="NewIPFSAddress"
-                 placeholder="New Address"
-                 name="NewAddressName"
-             />
-            <button type="button" className="btn btn-link" onClick={() => this.addAddress()}>Add IPFS Address</button>
-            <input
-                 type="text"
-                 id="NewIPFSContent"
-                 ref="b"
-                 placeholder="New Content"
 
-                 name="NewIPFSContentName"
-             />{this.state.IPFSText}
+      {formInstance}
 
-              <button type="button" className="btn btn-link" onClick={() => this.addIPFSContent()}>Add IPFS Content</button>
 
-              <button type="button" className="btn btn-link" onClick={() => this.makeAPIData()}>Add API Data</button>
 
-           {ShowMessage}
+
+
+
+
+              <button type="button" className="btn" onClick={() => this.makeAPIData()}>Get Data</button>
+ <PageHeader><small>{this.state.processingMessage}</small></PageHeader>
+
 
             <BootstrapTable data={this.state.products} striped={true} hover={true}>
-                <TableHeaderColumn dataField="reviewIndex" isKey={true} dataAlign="center" dataSort={true}>Review
-                    ID</TableHeaderColumn>
+                <TableHeaderColumn width="50"   dataField="reviewIndex" isKey={true} dataAlign="center" dataSort={true}>ID
+                </TableHeaderColumn>
                 <TableHeaderColumn dataField="ipfsAddr" dataAlign="center" dataSort={true}>Ipfs
                     Address</TableHeaderColumn>
-                <TableHeaderColumn dataField="ipfsText" dataAlign="center" dataSort={true}>Ipfs
+                <TableHeaderColumn width="600" dataField="ipfsText" dataAlign="center" dataSort={true}>Ipfs
                     Text</TableHeaderColumn>
-
+                    <TableHeaderColumn width="50" dataField="ipfsBid" dataAlign="center" dataSort={true}>Bid
+                        Text</TableHeaderColumn>
             </BootstrapTable>
         </div>
     );
